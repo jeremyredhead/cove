@@ -21,6 +21,7 @@ Procedure when bumping the version number:
 - `euph.rooms.<name>.username` config option
 - `euph.rooms.<name>.force_username` config option
 - `euph.rooms.<name>.password` config option
+- Key bindings to move to parent/top-level parent
 
 ## v0.3.0 - 2022-08-22
 
