@@ -60,6 +60,23 @@ impl<'a> SpanFinder<'a> {
         }
     }
 
+    // despite the name, this checks data of the form `:shortcode`, **not** `:shortcode:`
+    fn is_valid_shortcode(&self, range: Range<usize>) -> bool {
+        let text = &self.content[range.start..range.end];
+        if range.len() <= 1 {
+            return false;
+        }
+
+        let Some(name) = Some(text)
+            .and_then(|it| it.strip_prefix(':'))
+            // FIXME: we should check if a trailing colon is present, which is incorrect usage
+        else {
+            return false;
+        };
+
+        util::EMOJI.get(name).is_some()
+    }
+
     fn close_span(&mut self, end: usize) {
         let Some((span, start)) = self.span else {
             return;
@@ -81,9 +98,17 @@ impl<'a> SpanFinder<'a> {
             ('@', _) if self.room_or_mention_possible => self.open_span(SpanType::Mention, idx),
             ('&', _) if self.room_or_mention_possible => self.open_span(SpanType::Room, idx),
             (':', None) => self.open_span(SpanType::Emoji, idx),
-            (':', Some((SpanType::Emoji, _))) => self.close_span(idx + 1),
+            (':', Some((SpanType::Emoji, start))) => {
+                if self.is_valid_shortcode(start..idx) {
+                    self.close_span(idx + 1)
+                } else {
+                    self.open_span(SpanType::Emoji, idx)
+                }
+            }
             (c, Some((SpanType::Mention, _))) if !nick_char(c) => self.close_span(idx),
             (c, Some((SpanType::Room, _))) if !room_char(c) => self.close_span(idx),
+            // technically isn't needed but let's avoid gigantic spans, yeah?
+            (c, Some((SpanType::Emoji, _))) if c.is_whitespace() => self.close_span(idx),
             _ => {}
         }
 
@@ -202,6 +227,16 @@ mod tests {
             find_spans("a &b &c d"),
             vec![(SpanType::Room, 2..4), (SpanType::Room, 5..7)]
         );
+    }
+
+    #[test]
+    fn emoji() {
+        assert_eq!(find_spans("a:b:c"), vec![(SpanType::Emoji, 1..4)]);
+        assert_eq!(find_spans(":b:pensive:"), vec![(SpanType::Emoji, 0..3)]);
+        assert_eq!(find_spans(":V:pensive:"), vec![(SpanType::Emoji, 2..11)]);
+        assert_eq!(find_spans(":P :pensive:"), vec![(SpanType::Emoji, 3..12)]);
+        assert_eq!(find_spans(":;:pensive:"), vec![(SpanType::Emoji, 2..11)]);
+        assert_eq!(find_spans("::pensive:"), vec![(SpanType::Emoji, 1..10)]);
     }
 
     #[test]

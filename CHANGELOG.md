@@ -20,6 +20,10 @@ Procedure when bumping the version number:
 - Display emoji user id hashes in the nick list
 - Compile linux binary with older glibc version
 
+### Fixed
+
+- Emoji shortcodes not always being highlighted or replaced correctly
+
 ## v0.9.3 - 2025-05-31
 
 ### Added
