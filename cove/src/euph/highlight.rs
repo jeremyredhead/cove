@@ -60,31 +60,18 @@ impl<'a> SpanFinder<'a> {
         }
     }
 
-    // despite the name, this checks data of the form `:shortcode`, **not** `:shortcode:`
-    fn is_valid_shortcode(&self, range: Range<usize>) -> bool {
-        let text = &self.content[range.start..range.end];
-        if range.len() <= 1 {
-            return false;
-        }
-
-        let Some(name) = Some(text)
-            .and_then(|it| it.strip_prefix(':'))
-            // FIXME: we should check if a trailing colon is present, which is incorrect usage
-        else {
-            return false;
-        };
-
-        util::EMOJI.get(name).is_some()
-    }
-
-    fn close_span(&mut self, end: usize) {
+    fn close_span(&mut self, end: usize) -> bool {
         let Some((span, start)) = self.span else {
-            return;
+            return false;
         };
-        if self.is_valid_span(span, start..end) {
-            self.result.push((span, start..end));
+        if !self.is_valid_span(span, start..end) {
+            self.span = None;
+            return false;
         }
+
+        self.result.push((span, start..end));
         self.span = None;
+        true
     }
 
     fn open_span(&mut self, span: SpanType, start: usize) {
@@ -98,17 +85,22 @@ impl<'a> SpanFinder<'a> {
             ('@', _) if self.room_or_mention_possible => self.open_span(SpanType::Mention, idx),
             ('&', _) if self.room_or_mention_possible => self.open_span(SpanType::Room, idx),
             (':', None) => self.open_span(SpanType::Emoji, idx),
-            (':', Some((SpanType::Emoji, start))) => {
-                if self.is_valid_shortcode(start..idx) {
-                    self.close_span(idx + 1)
-                } else {
-                    self.open_span(SpanType::Emoji, idx)
+            (':', Some((SpanType::Emoji, _))) => {
+                let span_added = self.close_span(idx + 1);
+                if !span_added {
+                    self.open_span(SpanType::Emoji, idx);
                 }
             }
-            (c, Some((SpanType::Mention, _))) if !nick_char(c) => self.close_span(idx),
-            (c, Some((SpanType::Room, _))) if !room_char(c) => self.close_span(idx),
-            // technically isn't needed but let's avoid gigantic spans, yeah?
-            (c, Some((SpanType::Emoji, _))) if c.is_whitespace() => self.close_span(idx),
+            (c, Some((SpanType::Mention, _))) if !nick_char(c) => {
+                self.close_span(idx);
+            }
+            (c, Some((SpanType::Room, _))) if !room_char(c) => {
+                self.close_span(idx);
+            }
+            // Technically isn't needed but let's avoid gigantic spans, yeah?
+            (c, Some((SpanType::Emoji, _))) if c.is_whitespace() => {
+                self.close_span(idx);
+            }
             _ => {}
         }
 
