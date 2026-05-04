@@ -388,7 +388,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -426,13 +426,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
 name = "euphoxide"
 version = "0.6.1"
-source = "git+https://git.plugh.de/Garmelon/euphoxide.git#79d601cfc2a85fef572dcd7eeb71501e2bd43750"
+source = "git+https://git.plugh.de/Garmelon/euphoxide.git#abb41884cda63ee5800cb88230fe4ac15f62ba42"
 dependencies = [
  "caseless",
  "futures-util",
@@ -449,7 +449,7 @@ dependencies = [
 [[package]]
 name = "euphoxide-client"
 version = "0.6.1"
-source = "git+https://git.plugh.de/Garmelon/euphoxide.git#79d601cfc2a85fef572dcd7eeb71501e2bd43750"
+source = "git+https://git.plugh.de/Garmelon/euphoxide.git#abb41884cda63ee5800cb88230fe4ac15f62ba42"
 dependencies = [
  "cookie",
  "euphoxide",
@@ -709,7 +709,7 @@ dependencies = [
  "portable-atomic",
  "portable-atomic-util",
  "serde_core",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1105,7 +1105,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1375,7 +1375,7 @@ dependencies = [
  "getrandom 0.4.2",
  "once_cell",
  "rustix 1.1.4",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

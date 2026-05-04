@@ -121,7 +121,7 @@ impl EuphRoom {
             let RoomIdentifier { domain, name: room } = self.vault().room().clone();
 
             let mut client_config = ClientConfig::new(self.server_config.clone(), room.clone());
-            client_config.human = true;
+            client_config.server.client.human = true;
             client_config.username = self.room_config.username.clone();
             client_config.force_username = self.room_config.force_username;
             client_config.password = self.room_config.password.clone();
