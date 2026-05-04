@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up rust
         run: rustup update
@@ -36,7 +36,7 @@ jobs:
         run: rustc -vV | awk '/^host/ { print $2 }' > target/release/host
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cove-${{ matrix.os }}
           path: |
@@ -53,7 +53,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Zip artifacts
         run: |
@@ -67,7 +67,7 @@ jobs:
           zip -jr "cove-$(cat cove-macos-15/host).zip"       cove-macos-15/cove
 
       - name: Create new release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body: Automated release, see [CHANGELOG.md](CHANGELOG.md) for more details.
           files: "*.zip"
