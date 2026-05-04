@@ -1,6 +1,3 @@
-# What software is installed by default:
-# https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-
 name: build
 
 on:
@@ -16,10 +13,11 @@ jobs:
     strategy:
       matrix:
         os:
+          # https://github.com/actions/runner-images
           - ubuntu-22.04
           - windows-latest
           - macos-latest
-          - macos-13
+          - macos-15
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repo
@@ -62,11 +60,11 @@ jobs:
           chmod +x cove-ubuntu-22.04/cove
           chmod +x cove-windows-latest/cove.exe
           chmod +x cove-macos-latest/cove
-          chmod +x cove-macos-13/cove
-          zip -jr "cove-$(cat cove-ubuntu-22.04/host).zip"  cove-ubuntu-22.04/cove
+          chmod +x cove-macos-15/cove
+          zip -jr "cove-$(cat cove-ubuntu-22.04/host).zip"   cove-ubuntu-22.04/cove
           zip -jr "cove-$(cat cove-windows-latest/host).zip" cove-windows-latest/cove.exe
           zip -jr "cove-$(cat cove-macos-latest/host).zip"   cove-macos-latest/cove
-          zip -jr "cove-$(cat cove-macos-13/host).zip"       cove-macos-13/cove
+          zip -jr "cove-$(cat cove-macos-15/host).zip"       cove-macos-15/cove
 
       - name: Create new release
         uses: softprops/action-gh-release@v2
