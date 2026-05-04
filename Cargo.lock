@@ -431,7 +431,7 @@ dependencies = [
 [[package]]
 name = "euphoxide"
 version = "0.6.1"
-source = "git+https://github.com/Garmelon/euphoxide.git?tag=v0.6.1#7a292c429ad44aa6aa52fc381e3168841d6303b0"
+source = "git+https://git.plugh.de/Garmelon/euphoxide.git?tag=v0.6.1#7a292c429ad44aa6aa52fc381e3168841d6303b0"
 dependencies = [
  "async-trait",
  "caseless",
@@ -1528,7 +1528,7 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 [[package]]
 name = "toss"
 version = "0.3.4"
-source = "git+https://github.com/Garmelon/toss.git?tag=v0.3.4#57aa8c59308f6f0aa82bde415a42b56c3d6f7c4d"
+source = "git+https://git.plugh.de/Garmelon/toss.git?tag=v0.3.4#57aa8c59308f6f0aa82bde415a42b56c3d6f7c4d"
 dependencies = [
  "async-trait",
  "crossterm",
@@ -1622,7 +1622,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 [[package]]
 name = "vault"
 version = "0.4.0"
-source = "git+https://github.com/Garmelon/vault.git?tag=v0.4.0#a53254d2e787d15fd2d00584fddf9b84e79572ee"
+source = "git+https://git.plugh.de/Garmelon/vault.git?tag=v0.4.0#a53254d2e787d15fd2d00584fddf9b84e79572ee"
 dependencies = [
  "rusqlite",
  "tokio",

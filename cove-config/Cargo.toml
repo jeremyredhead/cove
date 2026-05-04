@@ -1,15 +1,14 @@
 [package]
 name = "cove-config"
-version.workspace = true
-edition.workspace = true
+version = { workspace = true }
+edition = { workspace = true }
 
 [dependencies]
-cove-input = { path = "../cove-input" }
-cove-macro = { path = "../cove-macro" }
-
-serde.workspace = true
-thiserror.workspace = true
-toml.workspace = true
+cove-input = { workspace = true }
+cove-macro = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+toml = { workspace = true }
 
 [lints]
 workspace = true

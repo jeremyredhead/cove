@@ -1,18 +1,17 @@
 [package]
 name = "cove-input"
-version.workspace = true
-edition.workspace = true
+version = { workspace = true }
+edition = { workspace = true }
 
 [dependencies]
-cove-macro = { path = "../cove-macro" }
-
-crossterm.workspace = true
-edit.workspace = true
-parking_lot.workspace = true
-serde.workspace = true
-serde_either.workspace = true
-thiserror.workspace = true
-toss.workspace = true
+cove-macro = { workspace = true }
+crossterm = { workspace = true }
+edit = { workspace = true }
+parking_lot = { workspace = true }
+serde = { workspace = true }
+serde_either = { workspace = true }
+thiserror = { workspace = true }
+toss = { workspace = true }
 
 [lints]
 workspace = true

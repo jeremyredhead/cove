@@ -11,6 +11,10 @@ anyhow = "1.0.102"
 async-trait = "0.1.89"
 clap = { version = "4.6.1", features = ["derive", "deprecated"] }
 cookie = "0.18.1"
+cove = { path = "./cove" }
+cove-config = { path = "./cove-config" }
+cove-input = { path = "./cove-input" }
+cove-macro = { path = "./cove-macro" }
 crossterm = "0.28.1"
 directories = "6.0.0"
 edit = "0.1.5"
@@ -33,29 +37,31 @@ toml = "1.1.2"
 unicode-width = "0.2.2"
 
 [workspace.dependencies.euphoxide]
-git = "https://github.com/Garmelon/euphoxide.git"
+git = "https://git.plugh.de/Garmelon/euphoxide.git"
 tag = "v0.6.1"
 features = ["bot"]
 
 [workspace.dependencies.toss]
-git = "https://github.com/Garmelon/toss.git"
+git = "https://git.plugh.de/Garmelon/toss.git"
 tag = "v0.3.4"
 
 [workspace.dependencies.vault]
-git = "https://github.com/Garmelon/vault.git"
+git = "https://git.plugh.de/Garmelon/vault.git"
 tag = "v0.4.0"
 features = ["tokio"]
 
 [workspace.lints]
 rust.unsafe_code = { level = "forbid", priority = 1 }
 # Lint groups
-rust.deprecated_safe = "warn"
-rust.future_incompatible = "warn"
-rust.keyword_idents = "warn"
-rust.rust_2018_idioms = "warn"
+rust.deprecated-safe = "warn"
+rust.future-incompatible = "warn"
+rust.keyword-idents = "warn"
+rust.nonstandard-style = "warn"
+rust.refining-impl-trait = "warn"
+rust.rust-2018-idioms = "warn"
+rust.unknown-or-malformed-diagnostic-attributes = "warn"
 rust.unused = "warn"
 # Individual lints
-rust.non_local_definitions = "warn"
 rust.redundant_imports = "warn"
 rust.redundant_lifetimes = "warn"
 rust.single_use_lifetimes = "warn"
