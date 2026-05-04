@@ -131,7 +131,7 @@ impl<M: Msg> Tree<M> {
     }
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 #[async_trait]
 pub trait MsgStore<M: Msg> {
     type Error;

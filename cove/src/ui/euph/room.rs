@@ -44,7 +44,6 @@ enum Focus {
     NickList,
 }
 
-#[allow(clippy::large_enum_variant)]
 enum State {
     Normal,
     Auth(EditorState),
@@ -217,7 +216,7 @@ impl EuphRoom {
             (State::Nick(_), _) => self.state = State::Normal,
 
             (State::Account(account), state) => {
-                #[allow(clippy::collapsible_match)] // State is being modified
+                #[expect(clippy::collapsible_match)] // State is being modified
                 if !account.stabilize(state) {
                     self.state = State::Normal
                 }
@@ -622,7 +621,6 @@ impl EuphRoom {
 
     fn handle_euph_data(&mut self, data: &Data) -> bool {
         // These packets don't result in any noticeable change in the UI.
-        #[allow(clippy::match_like_matches_macro)]
         let handled = match data {
             Data::PingEvent(_) | Data::PingReply(_) => {
                 // Pings are displayed nowhere in the room UI.

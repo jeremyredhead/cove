@@ -15,7 +15,7 @@ use crate::{macros::logging_unwrap, vault::EuphRoomVault};
 
 const LOG_INTERVAL: Duration = Duration::from_secs(10);
 
-#[allow(clippy::large_enum_variant)]
+#[expect(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum State {
     Disconnected,
