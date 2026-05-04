@@ -2,17 +2,16 @@ use std::{
     collections::{HashMap, HashSet, hash_map::Entry},
     iter,
     sync::{Arc, Mutex},
-    time::Duration,
 };
 
 use cove_config::{Config, Keys, RoomsSortOrder};
 use cove_input::InputEvent;
 use crossterm::style::Stylize;
 use euphoxide::{
-    api::SessionType,
-    bot::instance::{Event, ServerConfig},
-    conn::{self, Joined},
+    api::UserType,
+    client::{self, Joined},
 };
+use euphoxide_client::{ClientEvent, ServerConfig};
 use jiff::tz::TimeZone;
 use tokio::sync::mpsc;
 use toss::{
@@ -72,10 +71,9 @@ struct EuphServer {
 impl EuphServer {
     async fn new(vault: &EuphVault, domain: String) -> Self {
         let cookies = logging_unwrap!(vault.cookies(domain.clone()).await);
-        let config = ServerConfig::default()
-            .domain(domain)
-            .cookies(Arc::new(Mutex::new(cookies)))
-            .timeout(Duration::from_secs(10));
+        let mut config = ServerConfig::default();
+        config.client.url = format!("https://{domain}/");
+        config.cookies = Arc::new(Mutex::new(cookies));
 
         Self {
             config,
@@ -325,9 +323,9 @@ impl Rooms {
                 &joined.session.name as &str,
             )));
         for (user_id, name) in sessions {
-            match user_id.session_type() {
-                Some(SessionType::Bot) if name.is_empty() => n += 1,
-                Some(SessionType::Bot) => b += 1,
+            match user_id.user_type() {
+                Some(UserType::Bot) if name.is_empty() => n += 1,
+                Some(UserType::Bot) => b += 1,
                 _ if name.is_empty() => l += 1,
                 _ => p += 1,
             }
@@ -356,12 +354,12 @@ impl Rooms {
             None | Some(euph::State::Stopped) => None,
             Some(euph::State::Disconnected) => Some("waiting".to_string()),
             Some(euph::State::Connecting) => Some("connecting".to_string()),
-            Some(euph::State::Connected(_, connected)) => match connected {
-                conn::State::Joining(joining) if joining.bounce.is_some() => {
+            Some(euph::State::Connected { state, .. }) => match state {
+                client::State::Joining(joining) if joining.bounce.is_some() => {
                     Some("auth required".to_string())
                 }
-                conn::State::Joining(_) => Some("joining".to_string()),
-                conn::State::Joined(joined) => Some(Self::format_pbln(joined)),
+                client::State::Joining(_) => Some("joining".to_string()),
+                client::State::Joined(joined) => Some(Self::format_pbln(joined)),
             },
         }
     }
@@ -640,14 +638,19 @@ impl Rooms {
         false
     }
 
-    pub async fn handle_euph_event(&mut self, event: Event) -> bool {
-        let config = event.config();
-        let room_id = RoomIdentifier::new(config.server.domain.clone(), config.room.clone());
+    pub async fn handle_euph_event(
+        &mut self,
+        domain: String,
+        room: String,
+        client_id: usize,
+        event: ClientEvent,
+    ) -> bool {
+        let room_id = RoomIdentifier::new(domain, room);
         let Some(room) = self.euph_rooms.get_mut(&room_id) else {
             return false;
         };
 
-        let handled = room.handle_event(event).await;
+        let handled = room.handle_event(client_id, event).await;
 
         let room_visible = match &self.state {
             State::ShowRoom(id) => *id == room_id,

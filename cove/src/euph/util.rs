@@ -12,10 +12,9 @@ pub static EMOJI: LazyLock<Emoji> = LazyLock::new(Emoji::load);
 
 pub static EMOJI_LIST: LazyLock<Vec<String>> = LazyLock::new(|| {
     let mut list = EMOJI
-        .0
-        .values()
-        .flatten()
-        .cloned()
+        .all()
+        .flat_map(|(_, emoji)| emoji)
+        .map(|it| it.to_string())
         .collect::<HashSet<_>>()
         .into_iter()
         .collect::<Vec<_>>();

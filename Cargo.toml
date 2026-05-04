@@ -18,6 +18,8 @@ cove-macro = { path = "./cove-macro" }
 crossterm = "0.28.1"
 directories = "6.0.0"
 edit = "0.1.5"
+euphoxide = { git = "https://git.plugh.de/Garmelon/euphoxide.git" }
+euphoxide-client = { git = "https://git.plugh.de/Garmelon/euphoxide.git" }
 jiff = "0.2.24"
 linkify = "0.11.0"
 log = { version = "0.4.29", features = ["std"] }
@@ -35,11 +37,6 @@ thiserror = "2.0.18"
 tokio = { version = "1.52.2", features = ["full"] }
 toml = "1.1.2"
 unicode-width = "0.2.2"
-
-[workspace.dependencies.euphoxide]
-git = "https://git.plugh.de/Garmelon/euphoxide.git"
-tag = "v0.6.1"
-features = ["bot"]
 
 [workspace.dependencies.toss]
 git = "https://git.plugh.de/Garmelon/toss.git"

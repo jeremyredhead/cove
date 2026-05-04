@@ -2,8 +2,8 @@ use std::iter;
 
 use crossterm::style::{Color, Stylize};
 use euphoxide::{
-    api::{NickEvent, SessionId, SessionType, SessionView, UserId},
-    conn::{Joined, SessionInfo},
+    api::{NickEvent, SessionId, SessionView, UserId, UserType},
+    client::{Joined, SessionInfo},
 };
 use toss::{
     Style, Styled, Widget, WidgetExt,
@@ -84,9 +84,9 @@ fn render_rows(
         .map(HalfSession::from_session_info)
         .chain(iter::once(HalfSession::from_session_view(&joined.session)));
     for sess in sessions {
-        match sess.id.session_type() {
-            Some(SessionType::Bot) if sess.name.is_empty() => nurkers.push(sess),
-            Some(SessionType::Bot) => bots.push(sess),
+        match sess.id.user_type() {
+            Some(UserType::Bot) if sess.name.is_empty() => nurkers.push(sess),
+            Some(UserType::Bot) => bots.push(sess),
             _ if sess.name.is_empty() => lurkers.push(sess),
             _ => people.push(sess),
         }
@@ -186,7 +186,7 @@ fn render_row(
         "!"
     } else if session.is_manager {
         "*"
-    } else if session.id.session_type() == Some(SessionType::Account) {
+    } else if session.id.user_type() == Some(UserType::Account) {
         "~"
     } else {
         ""

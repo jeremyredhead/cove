@@ -192,8 +192,7 @@ impl Log for Logger {
 
         let target = metadata.target();
         if target.starts_with("cove")
-            || target.starts_with("euphoxide::bot")
-            || target.starts_with("euphoxide::live")
+            || (target.starts_with("euphoxide") && target != "euphoxide::conn::full")
         {
             return true;
         }

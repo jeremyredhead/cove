@@ -4,10 +4,10 @@ use cove_config::{Config, Keys};
 use cove_input::InputEvent;
 use crossterm::style::Stylize;
 use euphoxide::{
-    api::{Data, Message, MessageId, PacketType, SessionId, packet::ParsedPacket},
-    bot::instance::{ConnSnapshot, Event, ServerConfig},
-    conn::{self, Joined, Joining, SessionInfo},
+    api::{Data, Message, MessageId, PacketType, ParsedPacket, SessionId},
+    client::{self, Joined, Joining, SessionInfo},
 };
+use euphoxide_client::{ClientConfig, ClientEvent, ServerConfig};
 use jiff::tz::TimeZone;
 use tokio::sync::{
     mpsc,
@@ -115,25 +115,40 @@ impl EuphRoom {
 
     pub fn connect(&mut self, next_instance_id: &mut usize) {
         if self.room.is_none() {
-            let room = self.vault().room();
-            let instance_config = self
-                .server_config
-                .clone()
-                .room(self.vault().room().name.clone())
-                .name(format!("{room:?}-{next_instance_id}"))
-                .human(true)
-                .username(self.room_config.username.clone())
-                .force_username(self.room_config.force_username)
-                .password(self.room_config.password.clone());
+            let client_id = *next_instance_id;
             *next_instance_id = next_instance_id.wrapping_add(1);
 
-            let tx = self.ui_event_tx.clone();
+            let RoomIdentifier { domain, name: room } = self.vault().room().clone();
+
+            let mut client_config = ClientConfig::new(self.server_config.clone(), room.clone());
+            client_config.human = true;
+            client_config.username = self.room_config.username.clone();
+            client_config.force_username = self.room_config.force_username;
+            client_config.password = self.room_config.password.clone();
+
+            let ui_event_tx = self.ui_event_tx.clone();
+            let (euph_tx, mut euph_rx) = mpsc::channel(10);
+            tokio::task::spawn(async move {
+                while let Some((client_id, event)) = euph_rx.recv().await {
+                    if ui_event_tx
+                        .send(UiEvent::Euph {
+                            domain: domain.clone(),
+                            room: room.clone(),
+                            client_id,
+                            event,
+                        })
+                        .is_err()
+                    {
+                        break;
+                    }
+                }
+            });
+
             self.room = Some(euph::Room::new(
                 self.vault().clone(),
-                instance_config,
-                move |e| {
-                    let _ = tx.send(UiEvent::Euph(e));
-                },
+                client_id,
+                client_config,
+                euph_tx,
             ));
         }
     }
@@ -203,16 +218,23 @@ impl EuphRoom {
         match (&mut self.state, room_state) {
             (
                 State::Auth(_),
-                Some(euph::State::Connected(
-                    _,
-                    conn::State::Joining(Joining {
-                        bounce: Some(_), ..
-                    }),
-                )),
+                Some(euph::State::Connected {
+                    state:
+                        client::State::Joining(Joining {
+                            bounce: Some(_), ..
+                        }),
+                    ..
+                }),
             ) => {} // Nothing to see here
             (State::Auth(_), _) => self.state = State::Normal,
 
-            (State::Nick(_), Some(euph::State::Connected(_, conn::State::Joined(_)))) => {}
+            (
+                State::Nick(_),
+                Some(euph::State::Connected {
+                    state: client::State::Joined(_),
+                    ..
+                }),
+            ) => {}
             (State::Nick(_), _) => self.state = State::Normal,
 
             (State::Account(account), state) => {
@@ -324,13 +346,18 @@ impl EuphRoom {
             None | Some(euph::State::Stopped) => info.then_plain(", archive"),
             Some(euph::State::Disconnected) => info.then_plain(", waiting..."),
             Some(euph::State::Connecting) => info.then_plain(", connecting..."),
-            Some(euph::State::Connected(_, conn::State::Joining(j))) if j.bounce.is_some() => {
-                info.then_plain(", auth required")
-            }
-            Some(euph::State::Connected(_, conn::State::Joining(_))) => {
-                info.then_plain(", joining...")
-            }
-            Some(euph::State::Connected(_, conn::State::Joined(j))) => {
+            Some(euph::State::Connected {
+                state: client::State::Joining(j),
+                ..
+            }) if j.bounce.is_some() => info.then_plain(", auth required"),
+            Some(euph::State::Connected {
+                state: client::State::Joining(_),
+                ..
+            }) => info.then_plain(", joining..."),
+            Some(euph::State::Connected {
+                state: client::State::Joined(j),
+                ..
+            }) => {
                 let nick = &j.session.name;
                 if nick.is_empty() {
                     info.then_plain(", present without nick")
@@ -388,18 +415,22 @@ impl EuphRoom {
     async fn handle_room_input_event(&mut self, event: &mut InputEvent<'_>, keys: &Keys) -> bool {
         match self.room_state() {
             // Authenticating
-            Some(euph::State::Connected(
-                _,
-                conn::State::Joining(Joining {
-                    bounce: Some(_), ..
-                }),
-            )) if event.matches(&keys.room.action.authenticate) => {
+            Some(euph::State::Connected {
+                state:
+                    client::State::Joining(Joining {
+                        bounce: Some(_), ..
+                    }),
+                ..
+            }) if event.matches(&keys.room.action.authenticate) => {
                 self.state = State::Auth(auth::new());
                 return true;
             }
 
             // Joined
-            Some(euph::State::Connected(_, conn::State::Joined(joined))) => {
+            Some(euph::State::Connected {
+                state: client::State::Joined(joined),
+                ..
+            }) => {
                 if event.matches(&keys.room.action.nick) {
                     self.state = State::Nick(nick::new(joined.clone()));
                     return true;
@@ -559,26 +590,24 @@ impl EuphRoom {
         }
     }
 
-    pub async fn handle_event(&mut self, event: Event) -> bool {
+    pub async fn handle_event(&mut self, client_id: usize, event: ClientEvent) -> bool {
         let Some(room) = &self.room else { return false };
 
-        if event.config().name != room.instance().config().name {
+        if client_id != room.client().id() {
             // If we allowed names other than the current one, old instances
             // that haven't yet shut down properly could mess up our state.
             return false;
         }
 
-        if let Event::Packet(
-            _,
-            ParsedPacket {
-                content: Ok(Data::SendEvent(send)),
-                ..
-            },
-            ConnSnapshot {
-                state: conn::State::Joined(joined),
-                ..
-            },
-        ) = &event
+        if let ClientEvent::Packet {
+            state: client::State::Joined(joined),
+            packet:
+                ParsedPacket {
+                    content: Ok(Data::SendEvent(send)),
+                    ..
+                },
+            ..
+        } = &event
         {
             let normalized_name = euphoxide::nick::normalize(&joined.session.name);
             let content = &*send.0.content;
@@ -599,7 +628,7 @@ impl EuphRoom {
 
         // We handle the packet internally first because the room event handling
         // will consume it while we only need a reference.
-        let handled = if let Event::Packet(_, packet, _) = &event {
+        let handled = if let ClientEvent::Packet { packet, .. } = &event {
             match &packet.content {
                 Ok(data) => self.handle_euph_data(data),
                 Err(reason) => self.handle_euph_error(packet.r#type, reason),

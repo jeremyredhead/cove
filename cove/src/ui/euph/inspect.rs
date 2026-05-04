@@ -3,7 +3,7 @@ use cove_input::InputEvent;
 use crossterm::style::Stylize;
 use euphoxide::{
     api::{Message, NickEvent, SessionView},
-    conn::SessionInfo,
+    client::SessionInfo,
 };
 use toss::{Style, Styled, Widget, widgets::Text};
 

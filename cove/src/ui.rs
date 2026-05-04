@@ -7,6 +7,7 @@ use std::{
 
 use cove_config::Config;
 use cove_input::InputEvent;
+use euphoxide_client::ClientEvent;
 use jiff::tz::TimeZone;
 use parking_lot::FairMutex;
 use tokio::{
@@ -55,7 +56,12 @@ pub enum UiEvent {
     GraphemeWidthsChanged,
     LogChanged,
     Term(crossterm::event::Event),
-    Euph(euphoxide::bot::instance::Event),
+    Euph {
+        domain: String,
+        room: String,
+        client_id: usize,
+        event: ClientEvent,
+    },
 }
 
 enum EventHandleResult {
@@ -237,8 +243,17 @@ impl Ui {
                 self.handle_term_event(terminal, crossterm_lock.clone(), event)
                     .await
             }
-            UiEvent::Euph(event) => {
-                if self.rooms.handle_euph_event(event).await {
+            UiEvent::Euph {
+                domain,
+                room,
+                client_id,
+                event,
+            } => {
+                if self
+                    .rooms
+                    .handle_euph_event(domain, room, client_id, event)
+                    .await
+                {
                     EventHandleResult::Redraw
                 } else {
                     EventHandleResult::Continue

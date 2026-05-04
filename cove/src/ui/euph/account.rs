@@ -1,7 +1,7 @@
 use cove_config::Keys;
 use cove_input::InputEvent;
 use crossterm::style::Stylize;
-use euphoxide::{api::PersonalAccountView, conn};
+use euphoxide::{api::PersonalAccountView, client};
 use toss::{
     Style, Widget, WidgetExt,
     widgets::{EditorState, Empty, Join3, Join4, Join5, Text},
@@ -99,7 +99,11 @@ impl AccountUiState {
 
     /// Returns `false` if the account UI should not be displayed any longer.
     pub fn stabilize(&mut self, state: Option<&euph::State>) -> bool {
-        if let Some(euph::State::Connected(_, conn::State::Joined(state))) = state {
+        if let Some(euph::State::Connected {
+            state: client::State::Joined(state),
+            ..
+        }) = state
+        {
             match (&self, &state.account) {
                 (Self::LoggedOut(_), Some(view)) => *self = Self::LoggedIn(LoggedIn(view.clone())),
                 (Self::LoggedIn(_), None) => *self = Self::LoggedOut(LoggedOut::new()),

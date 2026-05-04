@@ -1,6 +1,6 @@
 use cove_config::Keys;
 use cove_input::InputEvent;
-use euphoxide::conn::Joined;
+use euphoxide::client::Joined;
 use toss::{Style, Widget, widgets::EditorState};
 
 use crate::{

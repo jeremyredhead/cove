@@ -13,6 +13,7 @@ cove-input = { workspace = true }
 crossterm = { workspace = true }
 directories = { workspace = true }
 euphoxide = { workspace = true }
+euphoxide-client = { workspace = true }
 jiff = { workspace = true }
 linkify = { workspace = true }
 log = { workspace = true }
