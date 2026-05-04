@@ -169,21 +169,21 @@ impl LinksState {
             return PopupResult::Handled;
         }
 
-        if let Some(key_event) = event.key_event() {
-            if key_event.modifiers.is_empty() {
-                match key_event.code {
-                    KeyCode::Char('1') => return self.open_link_by_id(0),
-                    KeyCode::Char('2') => return self.open_link_by_id(1),
-                    KeyCode::Char('3') => return self.open_link_by_id(2),
-                    KeyCode::Char('4') => return self.open_link_by_id(3),
-                    KeyCode::Char('5') => return self.open_link_by_id(4),
-                    KeyCode::Char('6') => return self.open_link_by_id(5),
-                    KeyCode::Char('7') => return self.open_link_by_id(6),
-                    KeyCode::Char('8') => return self.open_link_by_id(7),
-                    KeyCode::Char('9') => return self.open_link_by_id(8),
-                    KeyCode::Char('0') => return self.open_link_by_id(9),
-                    _ => {}
-                }
+        if let Some(key_event) = event.key_event()
+            && key_event.modifiers.is_empty()
+        {
+            match key_event.code {
+                KeyCode::Char('1') => return self.open_link_by_id(0),
+                KeyCode::Char('2') => return self.open_link_by_id(1),
+                KeyCode::Char('3') => return self.open_link_by_id(2),
+                KeyCode::Char('4') => return self.open_link_by_id(3),
+                KeyCode::Char('5') => return self.open_link_by_id(4),
+                KeyCode::Char('6') => return self.open_link_by_id(5),
+                KeyCode::Char('7') => return self.open_link_by_id(6),
+                KeyCode::Char('8') => return self.open_link_by_id(7),
+                KeyCode::Char('9') => return self.open_link_by_id(8),
+                KeyCode::Char('0') => return self.open_link_by_id(9),
+                _ => {}
             }
         }
 

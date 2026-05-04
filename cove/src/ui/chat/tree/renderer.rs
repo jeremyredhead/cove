@@ -268,11 +268,9 @@ where
         blocks.push_bottom(block);
 
         // Children, recursively
-        if !folded {
-            if let Some(children) = tree.children(msg_id) {
-                for child in children {
-                    self.layout_subtree(tree, indent + 1, child, blocks);
-                }
+        if !folded && let Some(children) = tree.children(msg_id) {
+            for child in children {
+                self.layout_subtree(tree, indent + 1, child, blocks);
             }
         }
 

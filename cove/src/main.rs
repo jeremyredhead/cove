@@ -28,9 +28,10 @@ mod util;
 mod vault;
 mod version;
 
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, Default, clap::Parser)]
 enum Command {
     /// Run the client interactively (default).
+    #[default]
     Run,
     /// Export room logs as plain text files.
     Export(export::Args),
@@ -50,12 +51,6 @@ enum Command {
 enum WidthEstimationMethod {
     Legacy,
     Unicode,
-}
-
-impl Default for Command {
-    fn default() -> Self {
-        Self::Run
-    }
 }
 
 #[derive(Debug, clap::Parser)]

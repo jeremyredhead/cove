@@ -60,10 +60,10 @@ impl<'a> InputEvent<'a> {
     /// If the current event represents a key press, returns the [`KeyEvent`]
     /// associated with that key press.
     pub fn key_event(&self) -> Option<KeyEvent> {
-        if let Event::Key(event) = &self.event {
-            if matches!(event.kind, KeyEventKind::Press | KeyEventKind::Repeat) {
-                return Some(*event);
-            }
+        if let Event::Key(event) = &self.event
+            && matches!(event.kind, KeyEventKind::Press | KeyEventKind::Repeat)
+        {
+            return Some(*event);
         }
         None
     }

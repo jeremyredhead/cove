@@ -144,10 +144,10 @@ impl Config {
     }
 
     pub fn euph_room(&self, domain: &str, name: &str) -> EuphRoom {
-        if let Some(server) = self.euph.servers.get(domain) {
-            if let Some(room) = server.rooms.get(name) {
-                return room.clone();
-            }
+        if let Some(server) = self.euph.servers.get(domain)
+            && let Some(room) = server.rooms.get(name)
+        {
+            return room.clone();
         }
         EuphRoom::default()
     }

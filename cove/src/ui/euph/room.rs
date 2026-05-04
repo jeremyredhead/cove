@@ -160,10 +160,10 @@ impl EuphRoom {
     }
 
     pub fn retain(&mut self) {
-        if let Some(room) = &self.room {
-            if room.stopped() {
-                self.room = None;
-            }
+        if let Some(room) = &self.room
+            && room.stopped()
+        {
+            self.room = None;
         }
     }
 
@@ -217,6 +217,7 @@ impl EuphRoom {
             (State::Nick(_), _) => self.state = State::Normal,
 
             (State::Account(account), state) => {
+                #[allow(clippy::collapsible_match)] // State is being modified
                 if !account.stabilize(state) {
                     self.state = State::Normal
                 }
@@ -393,11 +394,9 @@ impl EuphRoom {
                 conn::State::Joining(Joining {
                     bounce: Some(_), ..
                 }),
-            )) => {
-                if event.matches(&keys.room.action.authenticate) {
-                    self.state = State::Auth(auth::new());
-                    return true;
-                }
+            )) if event.matches(&keys.room.action.authenticate) => {
+                self.state = State::Auth(auth::new());
+                return true;
             }
 
             // Joined
@@ -441,19 +440,19 @@ impl EuphRoom {
         }
 
         if event.matches(&keys.tree.action.inspect) {
-            if let Some(id) = self.chat.cursor() {
-                if let Some(msg) = logging_unwrap!(self.vault().full_msg(*id).await) {
-                    self.state = State::InspectMessage(msg);
-                }
+            if let Some(id) = self.chat.cursor()
+                && let Some(msg) = logging_unwrap!(self.vault().full_msg(*id).await)
+            {
+                self.state = State::InspectMessage(msg);
             }
             return true;
         }
 
         if event.matches(&keys.tree.action.links) {
-            if let Some(id) = self.chat.cursor() {
-                if let Some(msg) = logging_unwrap!(self.vault().msg(*id).await) {
-                    self.state = State::Links(LinksState::new(self.config, &msg.content));
-                }
+            if let Some(id) = self.chat.cursor()
+                && let Some(msg) = logging_unwrap!(self.vault().msg(*id).await)
+            {
+                self.state = State::Links(LinksState::new(self.config, &msg.content));
             }
             return true;
         }
@@ -471,14 +470,13 @@ impl EuphRoom {
         }
 
         if event.matches(&keys.tree.action.inspect) {
-            if let Some(joined) = self.room_state_joined() {
-                if let Some(id) = self.nick_list.selected() {
-                    if *id == joined.session.session_id {
-                        self.state =
-                            State::InspectSession(SessionInfo::Full(joined.session.clone()));
-                    } else if let Some(session) = joined.listing.get(id) {
-                        self.state = State::InspectSession(session.clone());
-                    }
+            if let Some(joined) = self.room_state_joined()
+                && let Some(id) = self.nick_list.selected()
+            {
+                if *id == joined.session.session_id {
+                    self.state = State::InspectSession(SessionInfo::Full(joined.session.clone()));
+                } else if let Some(session) = joined.listing.get(id) {
+                    self.state = State::InspectSession(session.clone());
                 }
             }
             return true;

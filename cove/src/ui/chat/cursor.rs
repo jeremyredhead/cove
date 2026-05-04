@@ -346,10 +346,10 @@ impl<Id: Clone + Eq + Hash> Cursor<Id> {
             } => {
                 let path = store.path(parent).await?;
                 let tree = store.tree(path.first()).await?;
-                if let Some(children) = tree.children(parent) {
-                    if let Some(last_child) = children.last() {
-                        *self = Self::Msg(last_child.clone());
-                    }
+                if let Some(children) = tree.children(parent)
+                    && let Some(last_child) = children.last()
+                {
+                    *self = Self::Msg(last_child.clone());
                 }
             }
         }

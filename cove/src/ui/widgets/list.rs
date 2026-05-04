@@ -197,19 +197,19 @@ impl<Id: Clone> ListState<Id> {
 
     /// Move the cursor up to the next selectable row.
     pub fn move_cursor_up(&mut self) {
-        if let Some(cursor) = &self.cursor {
-            if let Some(new_cursor) = self.selectable_before_index(cursor.idx) {
-                self.move_cursor_to(new_cursor);
-            }
+        if let Some(cursor) = &self.cursor
+            && let Some(new_cursor) = self.selectable_before_index(cursor.idx)
+        {
+            self.move_cursor_to(new_cursor);
         }
     }
 
     /// Move the cursor down to the next selectable row.
     pub fn move_cursor_down(&mut self) {
-        if let Some(cursor) = &self.cursor {
-            if let Some(new_cursor) = self.selectable_after_index(cursor.idx) {
-                self.move_cursor_to(new_cursor);
-            }
+        if let Some(cursor) = &self.cursor
+            && let Some(new_cursor) = self.selectable_after_index(cursor.idx)
+        {
+            self.move_cursor_to(new_cursor);
         }
     }
 

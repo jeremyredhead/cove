@@ -166,19 +166,19 @@ impl<M: Msg, S: MsgStore<M>> TreeViewState<M, S> {
         id: Option<&M::Id>,
     ) -> Result<bool, S::Error> {
         if event.matches(&keys.tree.action.fold_tree) {
-            if let Some(id) = id {
-                if !self.folded.remove(id) {
-                    self.folded.insert(id.clone());
-                }
+            if let Some(id) = id
+                && !self.folded.remove(id)
+            {
+                self.folded.insert(id.clone());
             }
             return Ok(true);
         }
 
         if event.matches(&keys.tree.action.toggle_seen) {
-            if let Some(id) = id {
-                if let Some(msg) = self.store.tree(id).await?.msg(id) {
-                    self.store.set_seen(id, !msg.seen()).await?;
-                }
+            if let Some(id) = id
+                && let Some(msg) = self.store.tree(id).await?.msg(id)
+            {
+                self.store.set_seen(id, !msg.seen()).await?;
             }
             return Ok(true);
         }

@@ -65,10 +65,8 @@ pub fn msg<M: Msg + ChatMsg>(
 ) -> Boxed<'static, Infallible> {
     let (mut nick, mut content) = msg.styled();
 
-    if nick_emoji {
-        if let Some(emoji) = msg.nick_emoji() {
-            nick = nick.then_plain("(").then_plain(emoji).then_plain(")");
-        }
+    if nick_emoji && let Some(emoji) = msg.nick_emoji() {
+        nick = nick.then_plain("(").then_plain(emoji).then_plain(")");
     }
 
     if caesar != 0 {
